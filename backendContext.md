@@ -189,8 +189,15 @@ The SIH Backend is a Retrieval-Augmented Generation (RAG) system built to analyz
 
 ## 12. Required Environment Variables
 
-*   **`GEMINI_API_KEY`** or **`GOOGLE_API_KEY`**: Required for the LLM synthesis phase. (If missing, backend falls back to returning raw evidence without LLM analysis).
-*   **`OPENAI_API_KEY`**: (Optional fallback LLM provider).
+*   **`ACTIVE_LLM`**: Explicitly controls which LLM provider to use. Available values:
+    *   `"google"`: Uses Gemini 3.6 Flash (default). Requires `GEMINI_API_KEY`.
+    *   `"openai"`: Uses gpt-4o-mini. Requires `OPENAI_API_KEY`.
+    *   `"groq"`: Uses Llama-3.1-70b. Requires `GROQ_API_KEY`.
+    *   `"mistral"`: Uses Mistral Large. Requires `MISTRAL_API_KEY`.
+*   **`GEMINI_API_KEY`** or **`GOOGLE_API_KEY`**: Required if `ACTIVE_LLM="google"`.
+*   **`OPENAI_API_KEY`**: Required if `ACTIVE_LLM="openai"`.
+*   **`GROQ_API_KEY`**: Required if `ACTIVE_LLM="groq"`.
+*   **`MISTRAL_API_KEY`**: Required if `ACTIVE_LLM="mistral"`.
 *   **`POSTGRES_URL`**: (Optional) To connect to a PostgreSQL database instead of the local SQLite file.
 
 *(Never commit actual API keys to the repository).*

@@ -12,16 +12,48 @@ from sihbackend.services.reranker import rerank_documents
 # Load environment variables from .env
 load_dotenv()
 
-# Check available LLM providers
+# Explicitly define which LLM provider to use. 
+# Set this in your .env file: ACTIVE_LLM="openai"
+# 
+# Available values:
+# "google"  - Uses Gemini 3.6 Flash (Requires GEMINI_API_KEY)
+# "openai"  - Uses gpt-4o-mini (Requires OPENAI_API_KEY)
+# "groq"    - Uses Llama-3.1-70b via Groq (Requires GROQ_API_KEY)
+# "mistral" - Uses Mistral Large (Requires MISTRAL_API_KEY)
+ACTIVE_LLM = os.environ.get("ACTIVE_LLM", "google").lower()
+
 LLM_PROVIDER = None
-# Check for Gemini API key first (user explicitly set GEMINI_API_KEY or GOOGLE_API_KEY)
-google_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-if google_key:
-    LLM_PROVIDER = "google"
-    from langchain_google_genai import ChatGoogleGenerativeAI
-elif os.environ.get("OPENAI_API_KEY"):
-    LLM_PROVIDER = "openai"
-    from langchain_openai import ChatOpenAI
+
+if ACTIVE_LLM == "google":
+    google_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if google_key:
+        LLM_PROVIDER = "google"
+        from langchain_google_genai import ChatGoogleGenerativeAI
+    else:
+        logging.error("ACTIVE_LLM is set to 'google' but no GEMINI_API_KEY is found.")
+elif ACTIVE_LLM == "openai":
+    openai_key = os.environ.get("OPENAI_API_KEY")
+    if openai_key:
+        LLM_PROVIDER = "openai"
+        from langchain_openai import ChatOpenAI
+    else:
+        logging.error("ACTIVE_LLM is set to 'openai' but no OPENAI_API_KEY is found.")
+elif ACTIVE_LLM == "groq":
+    groq_key = os.environ.get("GROQ_API_KEY")
+    if groq_key:
+        LLM_PROVIDER = "groq"
+        from langchain_groq import ChatGroq
+    else:
+        logging.error("ACTIVE_LLM is set to 'groq' but no GROQ_API_KEY is found.")
+elif ACTIVE_LLM == "mistral":
+    mistral_key = os.environ.get("MISTRAL_API_KEY")
+    if mistral_key:
+        LLM_PROVIDER = "mistral"
+        from langchain_mistralai import ChatMistralAI
+    else:
+        logging.error("ACTIVE_LLM is set to 'mistral' but no MISTRAL_API_KEY is found.")
+else:
+    logging.warning(f"Unknown ACTIVE_LLM value: {ACTIVE_LLM}. Valid options are 'google', 'openai', 'groq', or 'mistral'.")
 
 _embeddings = None
 _vectorstore_prior_art = None
@@ -135,8 +167,12 @@ def build_chat_response(query: str, jurisdiction: str, force_llm_failure: bool =
         try:
             if LLM_PROVIDER == "google":
                 llm = ChatGoogleGenerativeAI(model="gemini-3.6-flash", temperature=0, google_api_key=google_key)
-            else:
+            elif LLM_PROVIDER == "openai":
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+            elif LLM_PROVIDER == "groq":
+                llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0)
+            elif LLM_PROVIDER == "mistral":
+                llm = ChatMistralAI(model="mistral-large-latest", temperature=0)
                 
             structured_llm = llm.with_structured_output(RAGAnalysisOutput)
             
