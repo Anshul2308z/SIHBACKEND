@@ -16,13 +16,13 @@ def test_analyze_success():
     assert response.status_code == 200
     data = response.json()
     
-    # Assert schema matches the placeholder implementation
-    assert "Full analysis is currently unavailable" in data["answer"]
-    assert data["risk_level"] is None
+    # Assert schema matches the generation implementation when LLM is not configured
+    assert "LLM is not configured" in data["answer"]
+    assert data["risk_level"] == "unknown"
     assert data["key_requirements"] == []
     assert data["relevant_jurisdictions"] == []
-    assert data["sources"] == []
-    assert "The system is in prototype phase" in data["caveats"][0]
+    assert data["sources"] == ["Mock Source"]
+    assert "LLM Provider not configured" in data["caveats"][0]
 
 def test_analyze_empty_query():
     # Empty query string violates min_length=1

@@ -1,0 +1,219 @@
+[
+    {
+        "question": "What does Section 64 say about the revocation of patents?",
+        "expected_source": "Indian Law.pdf",
+        "expected_structural_identifier": "64",
+        "difficulty": "easy",
+        "query_type": "factual"
+    },
+    {
+        "question": "Can an invention be patented if it's merely a traditional knowledge property?",
+        "expected_source": "Indian Law.pdf",
+        "expected_structural_identifier": "3(p)",
+        "difficulty": "medium",
+        "query_type": "conceptual"
+    },
+    {
+        "question": "Which section covers the contents of specifications?",
+        "expected_source": "Indian Law.pdf",
+        "expected_structural_identifier": "10",
+        "difficulty": "easy",
+        "query_type": "factual"
+    },
+    {
+        "question": "What happens if foreign application information is withheld?",
+        "expected_source": "Indian Law.pdf",
+        "expected_structural_identifier": "8",
+        "difficulty": "medium",
+        "query_type": "natural-language"
+    },
+    {
+        "question": "What are the requirements for patenting a new form of a known substance?",
+        "expected_source": "Indian Law.pdf",
+        "expected_structural_identifier": "3(d)",
+        "difficulty": "medium",
+        "query_type": "factual"
+    },
+    {
+        "question": "Are methods of medical treatment for humans patentable?",
+        "expected_source": "Indian Law.pdf",
+        "expected_structural_identifier": "3(i)",
+        "difficulty": "easy",
+        "query_type": "paraphrased"
+    },
+    {
+        "question": "What disclosure requirement applies when an invention uses genetic resources?",
+        "expected_source": "wipo treaty law.pdf",
+        "expected_structural_identifier": "3",
+        "difficulty": "medium",
+        "query_type": "conceptual"
+    },
+    {
+        "question": "According to Article 10, what body is established for the parties?",
+        "expected_source": "wipo treaty law.pdf",
+        "expected_structural_identifier": "10",
+        "difficulty": "easy",
+        "query_type": "factual"
+    },
+    {
+        "question": "Can a patent be revoked solely because of failure to disclose genetic resource origins?",
+        "expected_source": "wipo treaty law.pdf",
+        "expected_structural_identifier": "5",
+        "difficulty": "hard",
+        "query_type": "natural-language"
+    },
+    {
+        "question": "What happens if there are disputes under the WIPO treaty?",
+        "expected_source": "wipo treaty law.pdf",
+        "expected_structural_identifier": "10",
+        "difficulty": "hard",
+        "query_type": "paraphrased"
+    },
+    {
+        "question": "How are Genetic resources (GR) defined in the treaty?",
+        "expected_source": "wipo treaty law.pdf",
+        "expected_structural_identifier": "2",
+        "difficulty": "medium",
+        "query_type": "factual"
+    },
+    {
+        "question": "What does Brazil require regarding genetic heritage?",
+        "expected_source": "international laws,reg.pdf",
+        "expected_structural_identifier": "Brazil",
+        "difficulty": "medium",
+        "query_type": "jurisdiction-specific"
+    },
+    {
+        "question": "Under Chinese Patent Law, what must be done for inventions based on plant genetic resources?",
+        "expected_source": "international laws,reg.pdf",
+        "expected_structural_identifier": "China",
+        "difficulty": "medium",
+        "query_type": "jurisdiction-specific"
+    },
+    {
+        "question": "Which Costa Rican law covers biodiversity involving Ayurvedic inventions?",
+        "expected_source": "international laws,reg.pdf",
+        "expected_structural_identifier": "Costa Rica",
+        "difficulty": "easy",
+        "query_type": "jurisdiction-specific"
+    },
+    {
+        "question": "What is the requirement in Ecuador for products developed from genetic resources?",
+        "expected_source": "international laws,reg.pdf",
+        "expected_structural_identifier": "Ecuador",
+        "difficulty": "hard",
+        "query_type": "jurisdiction-specific"
+    },
+    {
+        "question": "Does Cuba have a provision regarding biological material in its Decree-Law 290?",
+        "expected_source": "international laws,reg.pdf",
+        "expected_structural_identifier": "Cuba",
+        "difficulty": "medium",
+        "query_type": "jurisdiction-specific"
+    },
+    {
+        "question": "Which schedule specifies the food additives allowed in Ayurveda Aahar?",
+        "expected_source": "fssai regulations.pdf",
+        "expected_structural_identifier": "4",
+        "difficulty": "medium",
+        "query_type": "factual"
+    },
+    {
+        "question": "What are the packaging rules for Ayurveda Aahar?",
+        "expected_source": "fssai regulations.pdf",
+        "expected_structural_identifier": "6",
+        "difficulty": "medium",
+        "query_type": "paraphrased"
+    },
+    {
+        "question": "What restrictions exist on the sale of Ayurveda Aahar?",
+        "expected_source": "fssai regulations.pdf",
+        "expected_structural_identifier": "7",
+        "difficulty": "medium",
+        "query_type": "conceptual"
+    },
+    {
+        "question": "What does a trademark actually protect for an Ayurvedic business?",
+        "expected_source": "Ayurveda_Trademark_Act_IP_India_Summary.pdf",
+        "expected_structural_identifier": "1",
+        "difficulty": "easy",
+        "query_type": "factual"
+    },
+    {
+        "question": "Under what grounds can an Ayurvedic brand name be refused trademark registration?",
+        "expected_source": "Ayurveda_Trademark_Act_IP_India_Summary.pdf",
+        "expected_structural_identifier": "2",
+        "difficulty": "medium",
+        "query_type": "natural-language"
+    },
+    {
+        "question": "What is the e-filing fee for an extra claim above 10 for a startup?",
+        "expected_source": "full costs data.pdf",
+        "expected_structural_identifier": null,
+        "difficulty": "easy",
+        "query_type": "table"
+    },
+    {
+        "question": "How much does a TM-A registration cost for an individual?",
+        "expected_source": "full costs data.pdf",
+        "expected_structural_identifier": null,
+        "difficulty": "medium",
+        "query_type": "table"
+    },
+    {
+        "question": "What is the physical filing fee for a patent application by a large entity (Others)?",
+        "expected_source": "full costs data.pdf",
+        "expected_structural_identifier": null,
+        "difficulty": "hard",
+        "query_type": "table"
+    },
+    {
+        "question": "How much does the PCT excess-sheet fee cost?",
+        "expected_source": "full costs data.pdf",
+        "expected_structural_identifier": null,
+        "difficulty": "medium",
+        "query_type": "table"
+    },
+    {
+        "question": "What is the official website for the UK Intellectual Property Office?",
+        "expected_source": "offices organisation .pdf",
+        "expected_structural_identifier": null,
+        "difficulty": "easy",
+        "query_type": "factual"
+    },
+    {
+        "question": "Where is the main Patent Office located in India?",
+        "expected_source": "offices organisation .pdf",
+        "expected_structural_identifier": null,
+        "difficulty": "medium",
+        "query_type": "factual"
+    },
+    {
+        "question": "What is the link to the WIPO Traditional Knowledge Digital Library (TKDL)?",
+        "expected_source": "wipo sources.pdf",
+        "expected_structural_identifier": null,
+        "difficulty": "easy",
+        "query_type": "factual"
+    },
+    {
+        "question": "How does the Indian trademark system handle plant genetic resources?",
+        "expected_source": "Ayurveda_Trademark_Act_IP_India_Summary.pdf",
+        "expected_structural_identifier": "1",
+        "difficulty": "hard",
+        "query_type": "distractor"
+    },
+    {
+        "question": "Are biological processes patentable under FSSAI rules?",
+        "expected_source": "Indian Law.pdf",
+        "expected_structural_identifier": "3(j)",
+        "difficulty": "hard",
+        "query_type": "distractor"
+    },
+    {
+        "question": "What is the fee to register a trademark in Brazil?",
+        "expected_source": "international laws,reg.pdf",
+        "expected_structural_identifier": "Brazil",
+        "difficulty": "hard",
+        "query_type": "distractor"
+    }
+]
