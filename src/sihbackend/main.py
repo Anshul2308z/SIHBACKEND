@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sihbackend.api import health, analyze, chat, prior_art
+from sihbackend.api import health, analyze, chat, prior_art, translate, expert
 
 app = FastAPI(
     title="SIH Backend - IP Risk Analysis",
@@ -22,3 +22,5 @@ app.include_router(health.router)
 app.include_router(analyze.router)
 app.include_router(chat.router)
 app.include_router(prior_art.router)
+app.include_router(translate.router)
+app.include_router(expert.router)

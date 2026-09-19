@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 from typing import List, Optional
+from sihbackend.schemas.prior_art import PriorArtGraphResponse
 
 class ChatRequest(BaseModel):
     query: str
     jurisdiction: Optional[str] = "India"
+    language: Optional[str] = "en"
 
 class EvidenceItem(BaseModel):
     id: str
@@ -23,3 +25,4 @@ class ChatResponse(BaseModel):
     key_findings: List[str]
     next_steps: List[str]
     evidence: List[EvidenceItem]
+    prior_art_graph: Optional[PriorArtGraphResponse] = None

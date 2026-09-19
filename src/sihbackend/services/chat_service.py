@@ -7,6 +7,7 @@ from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
 from sihbackend.rag.embeddings import get_embeddings_model
 from sihbackend.schemas.chat import ChatResponse, EvidenceItem
+from sihbackend.schemas.prior_art import PriorArtGraphResponse, EvidenceNode
 from sihbackend.services.reranker import rerank_documents
 
 # Load environment variables from .env
@@ -88,7 +89,7 @@ class RAGAnalysisOutput(BaseModel):
     key_findings: List[str] = Field(description="3-5 bullet points of the most critical legal or prior-art findings.")
     next_steps: List[str] = Field(description="2-4 actionable recommended next steps for the user.")
 
-def build_chat_response(query: str, jurisdiction: str, force_llm_failure: bool = False) -> ChatResponse:
+def build_chat_response(query: str, jurisdiction: str, language: str = "en", force_llm_failure: bool = False) -> ChatResponse:
     prior_art_store, legal_store = _get_vectorstores()
     
     evidence_items: List[EvidenceItem] = []
@@ -97,29 +98,70 @@ def build_chat_response(query: str, jurisdiction: str, force_llm_failure: bool =
     # --- 1A. Prior Art Retrieval & Reranking ---
     # Broad dense retrieval (top 15 candidates)
     pa_dense_results = prior_art_store.similarity_search_with_score(query, k=15)
-    # Cross-encoder reranking (top 3)
-    pa_reranked = rerank_documents(query, pa_dense_results, top_k=3)
+    # Cross-encoder reranking (top 5 to build a rich graph)
+    pa_reranked = rerank_documents(query, pa_dense_results, top_k=5)
+    
+    # Build Graph Response
+    graph_nodes = []
+    graph_edges = []
+    formulation_id = "formulation_0"
+    graph_nodes.append(EvidenceNode(id=formulation_id, label="User Formulation", layer="formulation", passage=query))
     
     for idx, (doc, chroma_dist, rerank_score) in enumerate(pa_reranked):
-        # Even with reranking, we can enforce a baseline threshold if needed,
-        # but the reranker handles relevance well. We'll skip very low rerank scores (e.g., < -2.0)
         if rerank_score < -2.0:
             continue
             
         plant_family = doc.metadata.get("plant_family", "Unknown")
-        source = doc.metadata.get("source", "Unknown")
-        contexts.append(f"[PRIOR ART - {source}]: {doc.page_content}")
+        source_file = doc.metadata.get("source", "Unknown")
+        jurisdiction_val = doc.metadata.get("jurisdiction", "India")
         
-        evidence_items.append(
-            EvidenceItem(
-                id=f"ev_pa_{idx}",
-                number=source,
-                jurisdiction=doc.metadata.get("jurisdiction", "India"),
-                risk="risk" if rerank_score > 0 else "review",
-                title=f"Prior Art Record for {plant_family}",
-                whyRelevant=f"Match (Rerank: {rerank_score:.2f} | L2: {chroma_dist:.2f}). {doc.page_content[:100]}..."
+        # We only feed the top 3 docs to the LLM to save tokens
+        if idx < 3:
+            contexts.append(f"[PRIOR ART - {source_file}]: {doc.page_content}")
+            evidence_items.append(
+                EvidenceItem(
+                    id=f"ev_pa_{idx}",
+                    number=source_file,
+                    jurisdiction=jurisdiction_val,
+                    risk="risk" if rerank_score > 0 else "review",
+                    title=f"Prior Art Record for {plant_family}",
+                    whyRelevant=f"Match (Rerank: {rerank_score:.2f} | L2: {chroma_dist:.2f}). {doc.page_content[:100]}..."
+                )
+            )
+
+        # But we use all valid docs for the graph nodes
+        content_preview = doc.page_content.replace(f"[Plant: {plant_family}]\n", "")
+        case_num = None
+        if ":" in content_preview[:50]:
+            possible_case = content_preview.split(":")[0].strip()
+            if "/" in possible_case or "USPTO" in possible_case:
+                case_num = possible_case
+        
+        node_id = f"evidence_{idx}"
+        layer = "patent"
+        source_badge = "ipindia"
+        if case_num and "USPTO" in case_num:
+            layer = "international"
+            source_badge = "uspto"
+        elif "TKDL" in content_preview:
+            layer = "tkdl"
+            source_badge = "tkdl"
+            
+        graph_nodes.append(
+            EvidenceNode(
+                id=node_id,
+                label=f"{plant_family} Evidence",
+                layer=layer,
+                source=source_badge,
+                jurisdiction=jurisdiction_val,
+                caseNumber=case_num,
+                passage=content_preview[:300] + "..." if len(content_preview) > 300 else content_preview,
+                verification=f"Match (Rerank: {rerank_score:.2f} | L2: {chroma_dist:.2f}) from {source_file}"
             )
         )
+        graph_edges.append((formulation_id, node_id))
+        
+    prior_art_graph_data = PriorArtGraphResponse(nodes=graph_nodes, edges=graph_edges)
 
     # --- 1B. Legal Retrieval & Reranking ---
     if legal_store:
@@ -180,6 +222,7 @@ def build_chat_response(query: str, jurisdiction: str, force_llm_failure: bool =
                 """You are an IP and Legal compliance AI assistant.
                 Analyze the user's formulation or IP query based STRICTLY on the retrieved context below.
                 Target Jurisdiction: {jurisdiction}
+                Language: YOU MUST RESPOND IN {language} (use the provided language code like 'en', 'hi', 'mr', etc.).
                 
                 Retrieved Context:
                 {context}
@@ -194,6 +237,7 @@ def build_chat_response(query: str, jurisdiction: str, force_llm_failure: bool =
             chain = prompt | structured_llm
             result: RAGAnalysisOutput = chain.invoke({
                 "jurisdiction": jurisdiction,
+                "language": language,
                 "context": combined_context,
                 "query": query
             })
@@ -207,7 +251,8 @@ def build_chat_response(query: str, jurisdiction: str, force_llm_failure: bool =
                 applicable_ip_types=result.applicable_ip_types,
                 key_findings=result.key_findings,
                 next_steps=result.next_steps,
-                evidence=evidence_items
+                evidence=evidence_items,
+                prior_art_graph=prior_art_graph_data
             )
         except Exception as e:
             logging.error(f"LLM Generation failed: {e}")
@@ -223,5 +268,6 @@ def build_chat_response(query: str, jurisdiction: str, force_llm_failure: bool =
         applicable_ip_types=["Pending LLM Analysis"],
         key_findings=[f"Found relevant context in {ev.number} (L2: {ev.whyRelevant.split('L2: ')[1].split(')')[0]})" for ev in evidence_items[:3]],
         next_steps=["Review the attached evidence nodes.", "Configure API keys for full LLM synthesis."],
-        evidence=evidence_items
+        evidence=evidence_items,
+        prior_art_graph=prior_art_graph_data
     )
