@@ -8,10 +8,10 @@ def get_reranker():
     if _reranker_model is None:
         # Import inside to avoid slow startup if reranking isn't used immediately
         from sentence_transformers import CrossEncoder
-        # We select BAAI/bge-reranker-base because it offers a great balance between
-        # speed (base size) and state-of-the-art semantic ranking performance, especially
-        # useful for distinguishing dense/nuanced patent texts from general matching.
-        _reranker_model = CrossEncoder('BAAI/bge-reranker-base')
+        # We select cross-encoder/ms-marco-MiniLM-L-6-v2 because it is ultra-lightweight (~90MB)
+        # This prevents Out-Of-Memory (OOM) crashes on constrained environments like Render Free Tier
+        # while still providing excellent semantic reranking performance.
+        _reranker_model = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
     return _reranker_model
 
 def rerank_documents(query: str, docs_with_scores: List[Tuple[Document, float]], top_k: int = 5) -> List[Tuple[Document, float, float]]:
