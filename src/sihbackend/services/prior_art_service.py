@@ -1,5 +1,18 @@
+import os
+import shutil
 from typing import List, Optional
 from langchain_chroma import Chroma
+
+# Vercel Read-Only Filesystem Fix
+VERCEL_ENV = os.environ.get("VERCEL") == "1"
+BASE_VS_DIR = "/tmp/vectorstore" if VERCEL_ENV else "vectorstore"
+
+if VERCEL_ENV and not os.path.exists(BASE_VS_DIR):
+    try:
+        shutil.copytree("vectorstore", BASE_VS_DIR)
+    except Exception as e:
+        print("Failed to copy vectorstore to /tmp:", e)
+
 from sihbackend.rag.embeddings import get_embeddings_model
 from sihbackend.schemas.prior_art import PriorArtGraphResponse, EvidenceNode
 from sihbackend.services.reranker import rerank_documents
@@ -14,7 +27,7 @@ def _get_vectorstore():
     if _vectorstore is None:
         _embeddings = get_embeddings_model()
         _vectorstore = Chroma(
-            persist_directory="vectorstore/prior_art",
+            persist_directory=f"{BASE_VS_DIR}/prior_art",
             embedding_function=_embeddings
         )
     return _vectorstore

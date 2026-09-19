@@ -1,9 +1,22 @@
+import os
+import shutil
 from typing import List, Tuple
 import os
 import logging
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from langchain_chroma import Chroma
+
+# Vercel Read-Only Filesystem Fix
+VERCEL_ENV = os.environ.get("VERCEL") == "1"
+BASE_VS_DIR = "/tmp/vectorstore" if VERCEL_ENV else "vectorstore"
+
+if VERCEL_ENV and not os.path.exists(BASE_VS_DIR):
+    try:
+        shutil.copytree("vectorstore", BASE_VS_DIR)
+    except Exception as e:
+        print("Failed to copy vectorstore to /tmp:", e)
+
 from langchain_core.prompts import PromptTemplate
 from sihbackend.rag.embeddings import get_embeddings_model
 from sihbackend.schemas.chat import ChatResponse, EvidenceItem
@@ -67,14 +80,14 @@ def _get_vectorstores():
     
     if _vectorstore_prior_art is None:
         _vectorstore_prior_art = Chroma(
-            persist_directory="vectorstore/prior_art",
+            persist_directory=f"{BASE_VS_DIR}/prior_art",
             embedding_function=_embeddings
         )
         
     if _vectorstore_legal is None:
         try:
             _vectorstore_legal = Chroma(
-                persist_directory="vectorstore/legal",
+                persist_directory=f"{BASE_VS_DIR}/legal",
                 embedding_function=_embeddings
             )
         except Exception:
