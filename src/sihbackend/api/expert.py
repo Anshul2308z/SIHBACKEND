@@ -7,7 +7,7 @@ from sihbackend.schemas.expert import ExpertConsultationRequest, ExpertConsultat
 router = APIRouter(prefix="/api/v1/expert", tags=["Expert"])
 
 @router.post("/consultation", response_model=ExpertConsultationResponse)
-async def submit_consultation(request: ExpertConsultationRequest, db: Session = Depends(get_db)):
+def submit_consultation(request: ExpertConsultationRequest, db: Session = Depends(get_db)):
     db_consultation = ExpertConsultation(
         name=request.name,
         email=request.email,
