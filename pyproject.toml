@@ -43,3 +43,6 @@ dev = [
     "httpx>=0.28.1",
     "pytest>=9.1.1",
 ]
+
+[tool.vercel]
+entrypoint = "src.sihbackend.main:app"
