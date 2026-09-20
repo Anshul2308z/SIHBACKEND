@@ -5,7 +5,7 @@ import logging
 import os
 import asyncio
 
-from sihbackend.api import health, analyze, chat, prior_art, translate, expert, patents
+from sihbackend.api import health, analyze, chat, prior_art, translate, expert, patents, formulation
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -57,3 +57,4 @@ app.include_router(prior_art.router)
 app.include_router(translate.router)
 app.include_router(expert.router)
 app.include_router(patents.router)
+app.include_router(formulation.router)
