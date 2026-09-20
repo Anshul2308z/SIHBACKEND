@@ -34,6 +34,9 @@ def check_abs_compliance(request: AbsRequest):
             elif LLM_PROVIDER == "openai":
                 from langchain_openai import ChatOpenAI
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+            elif LLM_PROVIDER == "groq":
+                from langchain_groq import ChatGroq
+                llm = ChatGroq(model="llama3-8b-8192", temperature=0)
             else:
                 raise Exception(f"Unsupported LLM for structured output: {LLM_PROVIDER}")
 
