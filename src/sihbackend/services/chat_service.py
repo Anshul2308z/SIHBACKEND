@@ -248,10 +248,15 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                 "query": query
             })
             
+            if result.confidence < 25:
+                result.confidence = 0
+                evidence_items = []
+                prior_art_graph_data = PriorArtGraphResponse(nodes=[], edges=[])
+                
             return ChatResponse(
                 executive_answer=result.executive_answer,
                 confidence=result.confidence,
-                source_agreement=90,
+                source_agreement=90 if result.confidence > 0 else 0,
                 jurisdiction_coverage=100,
                 evidence_count=len(evidence_items),
                 applicable_ip_types=result.applicable_ip_types,
