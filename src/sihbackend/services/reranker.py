@@ -5,7 +5,7 @@ def get_reranker():
     # Reranker completely disabled to prevent 512MB RAM OOM crash on Render
     return None
 
-def rerank_documents(query: str, docs_with_scores: List[Tuple[Document, float]], top_k: int = 5, similarity_threshold: float = 0.75) -> List[Tuple[Document, float, float]]:
+def rerank_documents(query: str, docs_with_scores: List[Tuple[Document, float]], top_k: int = 5, similarity_threshold: float = 0.20) -> List[Tuple[Document, float, float]]:
     """
     Bypasses the heavy ML CrossEncoder to save 200MB+ of RAM on Render.
     Relies purely on the extremely fast Pinecone dense vector search with a dynamic Cosine Similarity threshold.
