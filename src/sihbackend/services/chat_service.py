@@ -90,6 +90,7 @@ def _get_vectorstores():
 class RAGAnalysisOutput(BaseModel):
     executive_answer: str = Field(description="A clear, executive summary answering the user's IP or compliance query based strictly on the context.")
     confidence: int = Field(description="Confidence score from 0 to 100 based on how well the context answers the query.")
+    source_agreement: int = Field(description="Percentage score (0-100) indicating how well the retrieved documents corroborate the finding.")
     applicable_ip_types: List[str] = Field(description="List of applicable IP protections (e.g., 'Process patent', 'Trade secret').")
     key_findings: List[str] = Field(description="3-5 bullet points of the most critical legal or prior-art findings.")
     next_steps: List[str] = Field(description="2-4 actionable recommended next steps for the user.")
@@ -234,9 +235,13 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                 
                 User Query: {query}
                 
-                Provide an executive summary, confidence score, applicable IP types, key findings, and next steps.
+                Provide an executive summary, confidence score, source agreement score, applicable IP types, key findings, and next steps.
                 Do NOT hallucinate. If the context does not fully answer the query, state the limitations clearly.
-                CRITICAL INSTRUCTION: If the provided context is completely irrelevant to the user's query, return a confidence score of exactly 0.
+                
+                SCORING RULES:
+                1. Confidence: If you find a 1-to-1 EXACT match in the prior art for BOTH the plant ingredient AND the specific therapeutic use/claim, you MUST assign a confidence score of 90 or higher.
+                2. Confidence: If the context is completely irrelevant to the user's query, return exactly 0.
+                3. Source Agreement: Evaluate if multiple documents corroborate the same claim (e.g., score 80-100 if multiple documents agree, lower if only a single isolated document mentions it or documents conflict).
                 """
             )
             
@@ -256,7 +261,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
             return ChatResponse(
                 executive_answer=result.executive_answer,
                 confidence=result.confidence,
-                source_agreement=90 if result.confidence > 0 else 0,
+                source_agreement=result.source_agreement if hasattr(result, 'source_agreement') else (90 if result.confidence > 0 else 0),
                 jurisdiction_coverage=100,
                 evidence_count=len(evidence_items),
                 applicable_ip_types=result.applicable_ip_types,
