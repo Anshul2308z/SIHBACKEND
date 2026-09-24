@@ -1,24 +1,26 @@
 import pytest
+import os
 from fastapi.testclient import TestClient
 from sihbackend.main import app
-from langchain_chroma import Chroma
+from langchain_pinecone import PineconeVectorStore
 from sihbackend.rag.embeddings import get_embeddings_model
 
 client = TestClient(app)
 
-def test_raw_chroma_legal_formulation():
+def test_raw_pinecone_legal_formulation():
     """Safety Net 1: Verify exact database output for formulation logic.
     Ensures that queries related to 'Phytopharmaceutical', 'Nutraceutical', or 'Ayurveda-Aahar'
     actually exist in our legal knowledge base to fuel the LLM.
     """
     emb = get_embeddings_model()
-    leg_store = Chroma(persist_directory="vectorstore/legal", embedding_function=emb)
+    index_name = os.environ.get("PINECONE_INDEX_NAME", "sihbackend")
+    leg_store = PineconeVectorStore(index_name=index_name, embedding=emb, namespace="legal")
     
     query = "Phytopharmaceutical CDSCO regulations"
     results = leg_store.similarity_search_with_score(query, k=2)
     
     # We expect to find legal documents in the vectorstore
-    assert len(results) > 0, "ChromaDB returned no legal results for phytopharmaceutical!"
+    assert len(results) > 0, "Pinecone returned no legal results for phytopharmaceutical!"
     
     doc, score = results[0]
     assert isinstance(score, float)

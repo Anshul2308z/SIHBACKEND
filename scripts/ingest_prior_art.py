@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import re
 import pdfplumber
@@ -66,7 +68,8 @@ def load_and_chunk_pdf(pdf_path: str) -> List[Document]:
 def main():
     # Allow passing target dir as env variable or use default
     target_dir = os.environ.get("PRIOR_ART_DIR", os.path.expanduser("~/Desktop/toChunk/today/family/"))
-    persist_dir = "vectorstore/prior_art"
+    INDEX_NAME = os.environ.get("PINECONE_INDEX_NAME", "sihbackend")
+    NAMESPACE = "prior_art"
     
     print(f"Target Directory: {target_dir}")
     if not os.path.exists(target_dir):
@@ -101,11 +104,12 @@ def main():
     print("Embedding chunks...")
     embeddings = get_embeddings_model()
     
-    print(f"Persisting {len(all_chunks)} vectors to {persist_dir}...")
+    print(f"Persisting {len(all_chunks)} vectors to Pinecone ({INDEX_NAME}, namespace: {NAMESPACE})...")
     create_or_update_vectorstore(
         documents=all_chunks,
         embeddings=embeddings,
-        persist_directory=persist_dir
+        index_name=INDEX_NAME,
+        namespace=NAMESPACE
     )
     print("Ingestion complete.")
 

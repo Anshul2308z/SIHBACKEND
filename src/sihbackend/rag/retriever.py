@@ -1,15 +1,15 @@
-from langchain_chroma import Chroma
+from langchain_pinecone import PineconeVectorStore
 from typing import List, Dict, Any, Tuple
 from langchain_core.documents import Document
 import numpy as np
 import hashlib
 
-def search_similar_documents(vectorstore: Chroma, query: str, k: int = 3) -> List[Document]:
+def search_similar_documents(vectorstore: PineconeVectorStore, query: str, k: int = 3) -> List[Document]:
     """Searches the vectorstore for documents similar to the query."""
     return vectorstore.similarity_search(query, k=k)
 
 class HybridRetriever:
-    def __init__(self, vectorstore: Chroma, k: int = 5, candidate_k: int = 20, rrf_c: int = 60):
+    def __init__(self, vectorstore: PineconeVectorStore, k: int = 5, candidate_k: int = 20, rrf_c: int = 60):
         self.vectorstore = vectorstore
         self.k = k
         self.candidate_k = candidate_k

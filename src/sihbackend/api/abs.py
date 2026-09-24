@@ -77,7 +77,7 @@ def check_abs_compliance(request: AbsRequest):
             return result
             
         except Exception as e:
-            logging.error(f"LLM ABS Classification failed: {e}")
+            logging.error(f"LLM ABS Cla ssification failed: {e}")
             
     # 3. Hardcoded Fallback logic mirroring the frontend if LLM fails
     score = 0

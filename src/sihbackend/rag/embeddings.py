@@ -11,11 +11,19 @@ class FastONNXEmbeddings:
         self.ef = embedding_functions.DefaultEmbeddingFunction()
         
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        # chromadb ef expects and returns lists
-        return self.ef(texts)
+        # chromadb ef expects and returns lists, but might return ndarray inside
+        embeddings = self.ef(texts)
+        if hasattr(embeddings, "tolist"):
+            return embeddings.tolist()
+        if isinstance(embeddings, list) and len(embeddings) > 0 and hasattr(embeddings[0], "tolist"):
+            return [e.tolist() for e in embeddings]
+        return embeddings
         
     def embed_query(self, text: str) -> List[float]:
-        return self.ef([text])[0]
+        embedding = self.ef([text])[0]
+        if hasattr(embedding, "tolist"):
+            return embedding.tolist()
+        return embedding
 
 def get_embeddings_model() -> FastONNXEmbeddings:
     """Returns the lightweight ONNX embeddings model instance."""

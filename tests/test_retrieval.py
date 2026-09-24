@@ -1,15 +1,18 @@
 import os
+import os
 from sihbackend.rag.embeddings import get_embeddings_model
-from langchain_chroma import Chroma
+from langchain_pinecone import PineconeVectorStore
 
 def test_retrieval():
     persist_dir = "vectorstore/prior_art"
     embeddings = get_embeddings_model()
     
-    print("Loading Chroma vectorstore...")
-    vectorstore = Chroma(
-        persist_directory=persist_dir,
-        embedding_function=embeddings
+    print("Loading Pinecone vectorstore...")
+    index_name = os.environ.get("PINECONE_INDEX_NAME", "sihbackend")
+    vectorstore = PineconeVectorStore(
+        index_name=index_name,
+        embedding=embeddings,
+        namespace="prior_art"
     )
     
     query = "Neem extract for treating skin conditions like acne or psoriasis"

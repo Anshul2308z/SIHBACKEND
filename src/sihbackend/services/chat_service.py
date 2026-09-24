@@ -1,21 +1,9 @@
 import os
-import shutil
 from typing import List, Tuple
-import os
 import logging
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
-from langchain_chroma import Chroma
-
-# Vercel Read-Only Filesystem Fix
-VERCEL_ENV = os.environ.get("VERCEL") == "1"
-BASE_VS_DIR = "/tmp/vectorstore" if VERCEL_ENV else "vectorstore"
-
-if VERCEL_ENV and not os.path.exists(BASE_VS_DIR):
-    try:
-        shutil.copytree("vectorstore", BASE_VS_DIR)
-    except Exception as e:
-        print("Failed to copy vectorstore to /tmp:", e)
+from langchain_pinecone import PineconeVectorStore
 
 from langchain_core.prompts import PromptTemplate
 from sihbackend.rag.embeddings import get_embeddings_model
@@ -77,18 +65,22 @@ def _get_vectorstores():
     global _embeddings, _vectorstore_prior_art, _vectorstore_legal
     if _embeddings is None:
         _embeddings = get_embeddings_model()
+        
+    index_name = os.environ.get("PINECONE_INDEX_NAME", "sihbackend")
     
     if _vectorstore_prior_art is None:
-        _vectorstore_prior_art = Chroma(
-            persist_directory=f"{BASE_VS_DIR}/prior_art",
-            embedding_function=_embeddings
+        _vectorstore_prior_art = PineconeVectorStore(
+            index_name=index_name,
+            embedding=_embeddings,
+            namespace="prior_art"
         )
         
     if _vectorstore_legal is None:
         try:
-            _vectorstore_legal = Chroma(
-                persist_directory=f"{BASE_VS_DIR}/legal",
-                embedding_function=_embeddings
+            _vectorstore_legal = PineconeVectorStore(
+                index_name=index_name,
+                embedding=_embeddings,
+                namespace="legal"
             )
         except Exception:
             _vectorstore_legal = None
@@ -120,7 +112,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
     formulation_id = "formulation_0"
     graph_nodes.append(EvidenceNode(id=formulation_id, label="User Formulation", layer="formulation", passage=query))
     
-    for idx, (doc, chroma_dist, rerank_score) in enumerate(pa_reranked):
+    for idx, (doc, pinecone_sim, rerank_score) in enumerate(pa_reranked):
         if rerank_score < -2.0:
             continue
             
@@ -138,7 +130,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                     jurisdiction=jurisdiction_val,
                     risk="risk" if rerank_score > 0 else "review",
                     title=f"Prior Art Record for {plant_family}",
-                    whyRelevant=f"Match (Rerank: {rerank_score:.2f} | L2: {chroma_dist:.2f}). {doc.page_content[:100]}..."
+                    whyRelevant=f"Match (Rerank: {rerank_score:.2f} | Sim: {pinecone_sim:.2f}). {doc.page_content[:100]}..."
                 )
             )
 
@@ -169,7 +161,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                 jurisdiction=jurisdiction_val,
                 caseNumber=case_num,
                 passage=content_preview[:300] + "..." if len(content_preview) > 300 else content_preview,
-                verification=f"Match (Rerank: {rerank_score:.2f} | L2: {chroma_dist:.2f}) from {source_file}"
+                verification=f"Match (Rerank: {rerank_score:.2f} | Sim: {pinecone_sim:.2f}) from {source_file}"
             )
         )
         graph_edges.append((formulation_id, node_id))
@@ -182,7 +174,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
             legal_dense_results = legal_store.similarity_search_with_score(query, k=15)
             legal_reranked = rerank_documents(query, legal_dense_results, top_k=2)
             
-            for idx, (doc, chroma_dist, rerank_score) in enumerate(legal_reranked):
+            for idx, (doc, pinecone_sim, rerank_score) in enumerate(legal_reranked):
                 if rerank_score < -2.0:
                     continue
                 source = doc.metadata.get("source", "Unknown")
@@ -195,7 +187,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                         jurisdiction=doc.metadata.get("jurisdiction", "India"),
                         risk="info",
                         title=f"Legal/Compliance Rule from {source}",
-                        whyRelevant=f"Match (Rerank: {rerank_score:.2f} | L2: {chroma_dist:.2f}). {doc.page_content[:100]}..."
+                        whyRelevant=f"Match (Rerank: {rerank_score:.2f} | Sim: {pinecone_sim:.2f}). {doc.page_content[:100]}..."
                     )
                 )
         except Exception as e:
@@ -280,7 +272,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
         jurisdiction_coverage=100,
         evidence_count=len(evidence_items),
         applicable_ip_types=["Pending LLM Analysis"],
-        key_findings=[f"Found relevant context in {ev.number} (L2: {ev.whyRelevant.split('L2: ')[1].split(')')[0]})" for ev in evidence_items[:3]],
+        key_findings=[f"Found relevant context in {ev.number} (Sim: {ev.whyRelevant.split('Sim: ')[1].split(')')[0]})" for ev in evidence_items[:3]],
         next_steps=["Review the attached evidence nodes.", "Configure API keys for full LLM synthesis."],
         evidence=evidence_items,
         prior_art_graph=prior_art_graph_data

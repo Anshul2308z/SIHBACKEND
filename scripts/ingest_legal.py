@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import hashlib
 from typing import List
@@ -19,7 +21,8 @@ IN_SCOPE_FILES = {
 
 def main():
     CORPUS_DIR = "corpus/"
-    PERSIST_DIR = "vectorstore/legal"
+    INDEX_NAME = os.environ.get("PINECONE_INDEX_NAME", "sihbackend")
+    NAMESPACE = "legal"
     
     # 1. Discover all in-scope PDFs
     all_pdfs = []
@@ -43,11 +46,12 @@ def main():
     print("Initializing embeddings...")
     embeddings = get_embeddings_model()
     
-    print("Storing in vector database...")
+    print(f"Storing in Pinecone ({INDEX_NAME}, namespace: {NAMESPACE})...")
     create_or_update_vectorstore(
         documents=chunks,
         embeddings=embeddings,
-        persist_directory=PERSIST_DIR
+        index_name=INDEX_NAME,
+        namespace=NAMESPACE
     )
     print("Ingestion complete.")
 

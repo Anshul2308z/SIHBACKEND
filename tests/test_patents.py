@@ -1,7 +1,8 @@
+import os
 import pytest
 from fastapi.testclient import TestClient
 from sihbackend.main import app
-from langchain_chroma import Chroma
+from langchain_pinecone import PineconeVectorStore
 from sihbackend.rag.embeddings import get_embeddings_model
 
 client = TestClient(app)
@@ -11,7 +12,7 @@ def test_raw_chroma_semantic_search():
     Ensures that a query for 'Turmeric' actually returns vectors and we can read their raw L2 distances.
     """
     emb = get_embeddings_model()
-    pa_store = Chroma(persist_directory="vectorstore/prior_art", embedding_function=emb)
+    pa_store = PineconeVectorStore(index_name=os.environ.get("PINECONE_INDEX_NAME", "sihbackend"), embedding=emb, namespace="prior_art")
     
     query = "turmeric and neem skin inflammation"
     results = pa_store.similarity_search_with_score(query, k=3)

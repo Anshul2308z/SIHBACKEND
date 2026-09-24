@@ -1,7 +1,8 @@
+import os
 import pytest
 from fastapi.testclient import TestClient
 from sihbackend.main import app
-from langchain_chroma import Chroma
+from langchain_pinecone import PineconeVectorStore
 from sihbackend.rag.embeddings import get_embeddings_model
 
 client = TestClient(app)
@@ -12,7 +13,7 @@ def test_raw_chroma_legal_abs():
     actually exist in our legal knowledge base.
     """
     emb = get_embeddings_model()
-    leg_store = Chroma(persist_directory="vectorstore/legal", embedding_function=emb)
+    leg_store = PineconeVectorStore(index_name=os.environ.get("PINECONE_INDEX_NAME", "sihbackend"), embedding=emb, namespace="legal")
     
     query = "Biological Diversity Act Access and Benefit Sharing NBA approval"
     results = leg_store.similarity_search_with_score(query, k=2)

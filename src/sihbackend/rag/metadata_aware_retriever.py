@@ -1,10 +1,10 @@
 from typing import List, Dict, Any, Tuple
 from langchain_core.documents import Document
-from langchain_chroma import Chroma
+from langchain_pinecone import PineconeVectorStore
 from sihbackend.rag.query_parser import LLMQueryParser
 
 class MetadataAwareRetriever:
-    def __init__(self, vectorstore: Chroma, use_fallback: bool = True, k: int = 5):
+    def __init__(self, vectorstore: PineconeVectorStore, use_fallback: bool = True, k: int = 5):
         self.vectorstore = vectorstore
         self.use_fallback = use_fallback
         self.k = k

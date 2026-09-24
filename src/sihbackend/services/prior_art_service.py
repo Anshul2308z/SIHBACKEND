@@ -1,17 +1,6 @@
 import os
-import shutil
 from typing import List, Optional
-from langchain_chroma import Chroma
-
-# Vercel Read-Only Filesystem Fix
-VERCEL_ENV = os.environ.get("VERCEL") == "1"
-BASE_VS_DIR = "/tmp/vectorstore" if VERCEL_ENV else "vectorstore"
-
-if VERCEL_ENV and not os.path.exists(BASE_VS_DIR):
-    try:
-        shutil.copytree("vectorstore", BASE_VS_DIR)
-    except Exception as e:
-        print("Failed to copy vectorstore to /tmp:", e)
+from langchain_pinecone import PineconeVectorStore
 
 from sihbackend.rag.embeddings import get_embeddings_model
 from sihbackend.schemas.prior_art import PriorArtGraphResponse, EvidenceNode
@@ -26,9 +15,11 @@ def _get_vectorstore():
     global _embeddings, _vectorstore
     if _vectorstore is None:
         _embeddings = get_embeddings_model()
-        _vectorstore = Chroma(
-            persist_directory=f"{BASE_VS_DIR}/prior_art",
-            embedding_function=_embeddings
+        index_name = os.environ.get("PINECONE_INDEX_NAME", "sihbackend")
+        _vectorstore = PineconeVectorStore(
+            index_name=index_name,
+            embedding=_embeddings,
+            namespace="prior_art"
         )
     return _vectorstore
 
@@ -63,7 +54,7 @@ def build_prior_art_graph(query: Optional[str]) -> PriorArtGraphResponse:
     )
     
     # Process results into evidence nodes
-    for idx, (doc, chroma_dist, rerank_score) in enumerate(reranked_results):
+    for idx, (doc, pinecone_sim, rerank_score) in enumerate(reranked_results):
         # We only want relatively good matches. 
         if rerank_score < -2.0:
             continue
@@ -102,7 +93,7 @@ def build_prior_art_graph(query: Optional[str]) -> PriorArtGraphResponse:
                 jurisdiction=jurisdiction,
                 caseNumber=case_num,
                 passage=content_preview[:300] + "..." if len(content_preview) > 300 else content_preview,
-                verification=f"Match (Rerank: {rerank_score:.2f} | L2: {chroma_dist:.2f}) from {source_file}"
+                verification=f"Match (Rerank: {rerank_score:.2f} | Sim: {pinecone_sim:.2f}) from {source_file}"
             )
         )
         edges.append((formulation_id, node_id))
