@@ -205,11 +205,11 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
     if not evidence_items:
         return ChatResponse(
             executive_answer="No relevant official records, prior art, or legal clauses were found matching your query in our current database.",
-            confidence=40,
+            confidence=0,
             source_agreement=0,
             jurisdiction_coverage=100,
             evidence_count=0,
-            applicable_ip_types=["Further analysis needed"],
+            applicable_ip_types=["None applicable"],
             key_findings=["No overlap with existing patents, TKDL records, or compliance laws in the current database."],
             next_steps=["Consult a human expert.", "Expand the search terms."],
             evidence=[]
@@ -244,6 +244,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                 
                 Provide an executive summary, confidence score, applicable IP types, key findings, and next steps.
                 Do NOT hallucinate. If the context does not fully answer the query, state the limitations clearly.
+                CRITICAL INSTRUCTION: If the provided context is completely irrelevant to the user's query, return a confidence score of exactly 0.
                 """
             )
             
