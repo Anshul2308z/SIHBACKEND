@@ -47,3 +47,11 @@ The project uses `pytest` for testing. To execute the test suite:
 ```bash
 uv run pytest
 ```
+
+## Supported LLM Models
+The application relies on specific Large Language Models depending on your configuration. You can switch models by setting `ACTIVE_LLM` in your `.env` file:
+
+- **Google (Gemini)**: `gemini-3.6-flash` (Set `ACTIVE_LLM="google"`)
+- **OpenAI**: `gpt-4o-mini` (Set `ACTIVE_LLM="openai"`)
+- **Groq**: `groq/compound` (Set `ACTIVE_LLM="groq"`)
+- **Mistral**: `mistral-large-latest` (Set `ACTIVE_LLM="mistral"`)
