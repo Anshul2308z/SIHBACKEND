@@ -34,6 +34,7 @@ def check_abs_compliance(request: AbsRequest):
             elif LLM_PROVIDER == "openai":
                 from langchain_openai import ChatOpenAI
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+            elif LLM_PROVIDER == "groq":
                 from langchain_groq import ChatGroq
                 llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=2048)
             else:

@@ -217,6 +217,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                 llm = ChatGoogleGenerativeAI(model="gemini-3.6-flash", temperature=0, google_api_key=google_key)
             elif LLM_PROVIDER == "openai":
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+            elif LLM_PROVIDER == "groq":
                 llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=2048)
             elif LLM_PROVIDER == "mistral":
                 llm = ChatMistralAI(model="mistral-large-latest", temperature=0)
