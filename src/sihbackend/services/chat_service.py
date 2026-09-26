@@ -218,7 +218,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
             elif LLM_PROVIDER == "openai":
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
             elif LLM_PROVIDER == "groq":
-                llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0, max_tokens=2048)
+                llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=2048)
             elif LLM_PROVIDER == "mistral":
                 llm = ChatMistralAI(model="mistral-large-latest", temperature=0)
                 
