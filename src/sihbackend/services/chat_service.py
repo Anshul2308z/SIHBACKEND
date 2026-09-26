@@ -210,8 +210,6 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
 
     # 3. LLM Generation
     combined_context = "\n\n".join(contexts)
-    if LLM_PROVIDER == 'groq':
-        combined_context = combined_context[:16000] # Safe 4000 token limit to prevent 429 TPM errors
     
     if LLM_PROVIDER and not force_llm_failure:
         try:
@@ -219,7 +217,6 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                 llm = ChatGoogleGenerativeAI(model="gemini-3.6-flash", temperature=0, google_api_key=google_key)
             elif LLM_PROVIDER == "openai":
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-            elif LLM_PROVIDER == "groq":
                 llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=2048)
             elif LLM_PROVIDER == "mistral":
                 llm = ChatMistralAI(model="mistral-large-latest", temperature=0)

@@ -23,8 +23,6 @@ def analyze_formulation(request: FormulationRequest):
             logging.warning(f"Skipping legal retrieval: {e}")
             
     combined_context = "\n\n".join(contexts)
-    if LLM_PROVIDER == 'groq':
-        combined_context = combined_context[:16000] # Safe 4000 token limit to prevent 429 TPM errors
 
     # 2. Invoke LLM for classification
     if LLM_PROVIDER:
@@ -36,7 +34,6 @@ def analyze_formulation(request: FormulationRequest):
             elif LLM_PROVIDER == "openai":
                 from langchain_openai import ChatOpenAI
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
-            elif LLM_PROVIDER == "groq":
                 from langchain_groq import ChatGroq
                 llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=2048)
             else:
