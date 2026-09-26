@@ -218,7 +218,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
             elif LLM_PROVIDER == "openai":
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
             elif LLM_PROVIDER == "groq":
-                llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=800)
+                llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=2048)
             elif LLM_PROVIDER == "mistral":
                 llm = ChatMistralAI(model="mistral-large-latest", temperature=0)
                 
@@ -234,6 +234,8 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
                 {context}
                 
                 User Query: {query}
+
+IMPORTANT: Be extremely concise. Keep arrays (key_findings, next_steps) to a MAXIMUM of 3 bullet points each to prevent token truncation.
                 
                 Provide an executive summary, confidence score, source agreement score, applicable IP types, key findings, and next steps.
                 Do NOT hallucinate. If the context does not fully answer the query, state the limitations clearly.

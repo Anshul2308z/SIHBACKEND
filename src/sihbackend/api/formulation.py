@@ -36,7 +36,7 @@ def analyze_formulation(request: FormulationRequest):
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
             elif LLM_PROVIDER == "groq":
                 from langchain_groq import ChatGroq
-                llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=800)
+                llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=2048)
             else:
                 raise Exception(f"Unsupported LLM for structured output: {LLM_PROVIDER}")
 
@@ -62,6 +62,7 @@ def analyze_formulation(request: FormulationRequest):
                 
                 Provide the label, confidence score (0-100), reasoning, licensing route, relevant authorities, and applicable IP protections.
                 Ensure your classification directly aligns with standard Indian regulatory frameworks.
+                IMPORTANT: Be extremely concise to prevent token truncation.
                 """
             )
             

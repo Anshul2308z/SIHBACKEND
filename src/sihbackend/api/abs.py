@@ -36,7 +36,7 @@ def check_abs_compliance(request: AbsRequest):
                 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
             elif LLM_PROVIDER == "groq":
                 from langchain_groq import ChatGroq
-                llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=800)
+                llm = ChatGroq(model="qwen/qwen3.8-27b", temperature=0, max_tokens=2048)
             else:
                 raise Exception(f"Unsupported LLM for structured output: {LLM_PROVIDER}")
 
@@ -59,6 +59,7 @@ def check_abs_compliance(request: AbsRequest):
                 
                 Determine the ABS risk level ('risk', 'review', or 'verified') and the required compliance frameworks. 
                 Explain exactly why NBA approval is or isn't required in your reasoning.
+                IMPORTANT: Be extremely concise to prevent token truncation.
                 """
             )
             
