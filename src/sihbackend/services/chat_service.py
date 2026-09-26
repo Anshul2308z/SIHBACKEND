@@ -238,7 +238,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
 IMPORTANT: Be extremely concise. Keep arrays (key_findings, next_steps) to a MAXIMUM of 3 bullet points each to prevent token truncation.
                 
                 Provide an executive summary, confidence score, source agreement score, applicable IP types, key findings, and next steps.
-                Do NOT hallucinate. If the context does not fully answer the query, state the limitations clearly.
+                Do NOT hallucinate. If the context does not fully answer the query, state the limitations clearly. IF NO RELEVANT CONTEXT IS FOUND, OUTPUT EXACTLY ONE KEY FINDING STATING 'No relevant context found.' AND STOP GENERATING IMMEDIATELY. DO NOT GENERATE FILLER TEXT OR UNICODE CHARACTERS.
                 
                 SCORING RULES:
                 1. Confidence: If you find a 1-to-1 EXACT match in the prior art for BOTH the plant ingredient AND the specific therapeutic use/claim, you MUST assign a confidence score of 90 or higher.
