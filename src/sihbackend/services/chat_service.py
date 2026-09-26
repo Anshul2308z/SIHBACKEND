@@ -103,7 +103,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
     
     # --- 1A. Prior Art Retrieval & Reranking ---
     # Broad dense retrieval (top 15 candidates)
-    pa_dense_results = prior_art_store.similarity_search_with_score(query, k=15)
+    pa_dense_results = prior_art_store.similarity_search_with_score(query, k=5)
     # Cross-encoder reranking (top 5 to build a rich graph)
     pa_reranked = rerank_documents(query, pa_dense_results, top_k=5)
     
@@ -172,7 +172,7 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
     # --- 1B. Legal Retrieval & Reranking ---
     if legal_store:
         try:
-            legal_dense_results = legal_store.similarity_search_with_score(query, k=15)
+            legal_dense_results = legal_store.similarity_search_with_score(query, k=5)
             legal_reranked = rerank_documents(query, legal_dense_results, top_k=2)
             
             for idx, (doc, pinecone_sim, rerank_score) in enumerate(legal_reranked):
@@ -210,6 +210,8 @@ def build_chat_response(query: str, jurisdiction: str, language: str = "en", for
 
     # 3. LLM Generation
     combined_context = "\n\n".join(contexts)
+    if LLM_PROVIDER == 'groq':
+        combined_context = combined_context[:16000] # Safe 4000 token limit to prevent 429 TPM errors
     
     if LLM_PROVIDER and not force_llm_failure:
         try:

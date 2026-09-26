@@ -23,6 +23,8 @@ def check_abs_compliance(request: AbsRequest):
             logging.warning(f"Skipping legal retrieval: {e}")
             
     combined_context = "\n\n".join(contexts)
+    if LLM_PROVIDER == 'groq':
+        combined_context = combined_context[:16000] # Safe 4000 token limit to prevent 429 TPM errors
 
     # 2. Invoke LLM for classification
     if LLM_PROVIDER:
